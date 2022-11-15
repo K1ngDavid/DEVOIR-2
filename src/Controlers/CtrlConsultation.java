@@ -20,19 +20,33 @@ public class CtrlConsultation
     public CtrlConsultation() {
         cnx = ConnexionBDD.getCnx();
     }
-
-    public ArrayList<Consultation> GetAllConsultations()
-    {
-
-        return null;
+    //SELECT DISTINCT (idPatient) , dateConsult,nomPatient,nomMedecin,quantite * (prixMedoc * tauxRemb%100/100) AS montant FROM patient,consultation,medecin,prescrire,medicament,vignette WHERE idPatient = consultation.numPatient AND numMedecin = medecin.idMedecin AND idConsult = prescrire.numConsult AND idMedoc = idVignette GROUP BY idConsult
+    public ArrayList<Consultation> GetAllConsultations() throws SQLException {
+        ArrayList<Consultation> lesConsultations = new ArrayList<>();
+        ps = cnx.prepareStatement("SELECT idConsult,dateConsult,nomPatient,nomMedecin,quantite*prixMedoc*(tauxRemb%100/100) FROM consultation,patient,prescrire,medicament,vignette,medecin WHERE idPatient = consultation.numPatient AND numMedecin = medecin.idMedecin AND idConsult = prescrire.numConsult AND numMedoc = idMedoc AND numVignette = vignette.idVignette GROUP BY idConsult");
+        rs = ps.executeQuery();
+        while (rs.next()){
+            lesConsultations.add(new Consultation(rs.getInt(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getDouble(5)));
+        }
+        return lesConsultations;
     }
-    public int getLastNumberOfConsultation()
-    {
-
-        return 0;
+    public int getLastNumberOfConsultation() throws SQLException {
+        int last_consultation = 0;
+        ps = cnx.prepareStatement("SELECT MAX(idConsult) FROM consultation");
+        rs = ps.executeQuery();
+        while (rs.next()){
+            last_consultation = rs.getInt(1) + 1;
+        }
+        return last_consultation;
     }
-    public void InsertConsultation(int idConsult, String dateConsultation, int numPatient,int numMedecin)
-    {
-
+    public void InsertConsultation(int idConsult, String dateConsultation, int numPatient,int numMedecin) throws SQLException {
+        ps = cnx.prepareStatement("INSERT INTO consultation VALUES(?,?,?,?)");
+        System.out.println("INSERT INTO consultation VALUES("+ idConsult+",'"+dateConsultation+"',"+numPatient+","+numMedecin+")");
+        ps.setInt(1,idConsult);
+        ps.setString(2,dateConsultation);
+        ps.setInt(3,numPatient);
+        ps.setInt(4,numMedecin);
+        ps.executeUpdate();
+        ps.close();
     }
 }

@@ -19,8 +19,11 @@ public class CtrlPrescrire
         cnx = ConnexionBDD.getCnx();
     }
 
-    public void InsertPrescrire(int idConsult, int numMedicament,int quantite)
-    {
-
+    public void InsertPrescrire(int idConsult, int numMedicament,int quantite) throws SQLException {
+        ps = cnx.prepareStatement("INSERT INTO prescrire VALUES (?,?,?)");
+        ps.setInt(1,idConsult);
+        ps.setInt(2,numMedicament);
+        ps.setInt(3,quantite);
+        ps.executeUpdate();
     }
 }

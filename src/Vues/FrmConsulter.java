@@ -9,6 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.sql.SQLException;
 
 public class FrmConsulter extends JFrame
 {
@@ -18,6 +19,11 @@ public class FrmConsulter extends JFrame
     private JTable tblConsultations;
     private JLabel lblMedicaments;
     private JTable tblMedicaments;
+
+    private ModelJTable modelJTable;
+    private CtrlConsultation ctrlConsultation;
+    private CtrlMedicament ctrlMedicament;
+    int idConsultation;
 
     public FrmConsulter()
     {
@@ -32,14 +38,33 @@ public class FrmConsulter extends JFrame
             public void windowOpened(WindowEvent e) {
                 super.windowOpened(e);
                 // A vous de jouer
+                modelJTable = new ModelJTable();
+                ctrlConsultation = new CtrlConsultation();
+
+                try {
+                    modelJTable.loadDataConsultations(ctrlConsultation.GetAllConsultations());
+                    tblConsultations.setModel(modelJTable);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
 
             }
         });
+        //prix de chaque medicament et quantité
         tblConsultations.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 // A vous de jouer
+                ctrlMedicament = new CtrlMedicament();
+                try {
+                    idConsultation = Integer.parseInt(tblConsultations.getValueAt(tblConsultations.getSelectedRow(),0).toString());
+                    modelJTable = new ModelJTable();
+                    modelJTable.loadDataMedicaments(ctrlMedicament.GetAllMedicamentsByIdConsultations(idConsultation));
+                    tblMedicaments.setModel(modelJTable);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
 
             }
         });
